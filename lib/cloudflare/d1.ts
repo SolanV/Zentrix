@@ -78,6 +78,47 @@ async function d1Query<T>(sql: string, params: D1Value[] = []) {
   return result?.results ?? []
 }
 
+interface D1BatchQuery {
+  sql: string
+  params?: D1Value[]
+}
+
+async function d1BatchQuery(queries: D1BatchQuery[]) {
+  const { accountId, databaseId, apiToken } = getD1Config()
+  const response = await fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        queries.map((q) => ({
+          sql: q.sql,
+          params: normalizeParams(q.params ?? []),
+        })),
+      ),
+      cache: 'no-store',
+    },
+  )
+  const payload = (await response.json()) as {
+    errors?: { message: string }[]
+    result?: D1QueryResult<any> | D1QueryResult<any>[]
+    success: boolean
+  }
+
+  if (!response.ok || !payload.success) {
+    const message =
+      payload.errors?.map((error) => error.message).join(', ') ||
+      `Cloudflare D1 batch query failed with status ${response.status}`
+
+    throw new Error(message)
+  }
+
+  return Array.isArray(payload.result) ? payload.result : [payload.result]
+}
+
 async function first<T>(sql: string, params: D1Value[] = []) {
   const rows = await d1Query<T>(sql, params)
   return rows[0] ?? null
@@ -573,78 +614,58 @@ export async function getDashboardData() {
     day: '2-digit',
   }).format(nextWeek)
 
-  const [
-    totalMembers,
-    activeMembers,
-    registeredThisMonth,
-    todayCheckins,
-    yesterdayCheckins,
-    paidThisMonth,
-    paidLastMonth,
-    overduePayments,
-    membersByPlan,
-    recentCheckins,
-    recentPayments,
-    recentMembers,
-    recentClasses,
-    upcomingRenewals,
-  ] = await Promise.all([
-    first<{ count: number }>('SELECT COUNT(*) AS count FROM members'),
-    first<{ count: number }>("SELECT COUNT(*) AS count FROM members WHERE status = 'active'"),
-    first<{ count: number }>('SELECT COUNT(*) AS count FROM members WHERE created_at >= ?', [
-      monthStart.toISOString(),
-    ]),
-    first<{ count: number }>('SELECT COUNT(*) AS count FROM attendance WHERE check_in >= ?', [
-      todayStart.toISOString(),
-    ]),
-    first<{ count: number }>(
-      'SELECT COUNT(*) AS count FROM attendance WHERE check_in >= ? AND check_in < ?',
-      [yesterdayStart.toISOString(), yesterdayEnd.toISOString()],
-    ),
-    d1Query<Pick<Payment, 'amount'>>(
-      "SELECT amount FROM payments WHERE status = 'paid' AND paid_at >= ?",
-      [monthStart.toISOString()],
-    ),
-    d1Query<Pick<Payment, 'amount'>>(
-      "SELECT amount FROM payments WHERE status = 'paid' AND paid_at >= ? AND paid_at < ?",
-      [lastMonthStart.toISOString(), lastMonthEnd.toISOString()],
-    ),
-    first<{ count: number }>("SELECT COUNT(*) AS count FROM payments WHERE status = 'overdue'"),
-    d1Query<{ membership_plans: { name?: string } | null }>(
-      `SELECT membership_plans.name AS plan_name
-       FROM members
-       LEFT JOIN membership_plans ON membership_plans.id = members.plan_id`,
-    ),
-    listAttendanceWithMembers(5),
-    d1Query<Payment & { member_name?: string | null }>(
-      `SELECT payments.*, members.full_name AS member_name
-       FROM payments
-       LEFT JOIN members ON members.id = payments.member_id
-       WHERE payments.status = 'paid'
-       ORDER BY payments.created_at DESC
-       LIMIT 3`,
-    ),
-    d1Query<Pick<Member, 'id' | 'full_name' | 'created_at'>>(
-      'SELECT id, full_name, created_at FROM members ORDER BY created_at DESC LIMIT 3',
-    ),
-    d1Query<GymClass & { trainer_name?: string | null; updated_at: string }>(
-      `SELECT classes.id, classes.name, classes.updated_at, trainers.full_name AS trainer_name
-       FROM classes
-       LEFT JOIN trainers ON trainers.id = classes.trainer_id
-       ORDER BY classes.updated_at DESC
-       LIMIT 2`,
-    ),
-    d1Query<Member & { plan_name?: string | null }>(
-      `SELECT members.*, membership_plans.name AS plan_name
-       FROM members
-       LEFT JOIN membership_plans ON membership_plans.id = members.plan_id
-       WHERE members.status = 'active'
-         AND members.membership_end >= ?
-         AND members.membership_end <= ?
-       ORDER BY members.membership_end ASC`,
-      [todayStr, nextWeekStr],
-    ),
+  const batchResults = await d1BatchQuery([
+    { sql: 'SELECT COUNT(*) AS count FROM members' },
+    { sql: "SELECT COUNT(*) AS count FROM members WHERE status = 'active'" },
+    { sql: 'SELECT COUNT(*) AS count FROM members WHERE created_at >= ?', params: [monthStart.toISOString()] },
+    { sql: 'SELECT COUNT(*) AS count FROM attendance WHERE check_in >= ?', params: [todayStart.toISOString()] },
+    { sql: 'SELECT COUNT(*) AS count FROM attendance WHERE check_in >= ? AND check_in < ?', params: [yesterdayStart.toISOString(), yesterdayEnd.toISOString()] },
+    { sql: "SELECT amount FROM payments WHERE status = 'paid' AND paid_at >= ?", params: [monthStart.toISOString()] },
+    { sql: "SELECT amount FROM payments WHERE status = 'paid' AND paid_at >= ? AND paid_at < ?", params: [lastMonthStart.toISOString(), lastMonthEnd.toISOString()] },
+    { sql: "SELECT COUNT(*) AS count FROM payments WHERE status = 'overdue'" },
+    { sql: `SELECT membership_plans.name AS plan_name FROM members LEFT JOIN membership_plans ON membership_plans.id = members.plan_id` },
+    { sql: `SELECT attendance.*, members.full_name AS member_name FROM attendance LEFT JOIN members ON members.id = attendance.member_id ORDER BY attendance.check_in DESC LIMIT 5` },
+    { sql: `SELECT payments.*, members.full_name AS member_name FROM payments LEFT JOIN members ON members.id = payments.member_id WHERE payments.status = 'paid' ORDER BY payments.created_at DESC LIMIT 3` },
+    { sql: 'SELECT id, full_name, created_at FROM members ORDER BY created_at DESC LIMIT 3' },
+    { sql: `SELECT classes.id, classes.name, classes.updated_at, trainers.full_name AS trainer_name FROM classes LEFT JOIN trainers ON trainers.id = classes.trainer_id ORDER BY classes.updated_at DESC LIMIT 2` },
+    { sql: `SELECT members.*, membership_plans.name AS plan_name FROM members LEFT JOIN membership_plans ON membership_plans.id = members.plan_id WHERE members.status = 'active' AND members.membership_end >= ? AND members.membership_end <= ? ORDER BY members.membership_end ASC`, params: [todayStr, nextWeekStr] }
   ])
+
+  const totalMembers = batchResults[0]?.results?.[0] as { count: number } | undefined
+  const activeMembers = batchResults[1]?.results?.[0] as { count: number } | undefined
+  const registeredThisMonth = batchResults[2]?.results?.[0] as { count: number } | undefined
+  const todayCheckins = batchResults[3]?.results?.[0] as { count: number } | undefined
+  const yesterdayCheckins = batchResults[4]?.results?.[0] as { count: number } | undefined
+  const paidThisMonth = (batchResults[5]?.results ?? []) as Pick<Payment, 'amount'>[]
+  const paidLastMonth = (batchResults[6]?.results ?? []) as Pick<Payment, 'amount'>[]
+  const overduePayments = batchResults[7]?.results?.[0] as { count: number } | undefined
+  const membersByPlan = (batchResults[8]?.results ?? []) as { plan_name: string | null }[]
+  
+  const recentCheckinsRows = (batchResults[9]?.results ?? []) as (Attendance & { member_name?: string | null })[]
+  const recentCheckins = recentCheckinsRows.map((row) => ({
+    ...row,
+    members: row.member_id ? { id: row.member_id, full_name: row.member_name ?? '' } : null,
+  })) as Attendance[]
+
+  const recentPaymentsRows = (batchResults[10]?.results ?? []) as (Payment & { member_name?: string | null })[]
+  const recentPayments = recentPaymentsRows.map((row) => ({
+    ...row,
+    members: row.member_id ? { id: row.member_id, full_name: row.member_name ?? '' } : null,
+  }))
+
+  const recentMembers = (batchResults[11]?.results ?? []) as Pick<Member, 'id' | 'full_name' | 'created_at'>[]
+
+  const recentClassesRows = (batchResults[12]?.results ?? []) as (GymClass & { trainer_name?: string | null; updated_at: string })[]
+  const recentClasses = recentClassesRows.map((row) => ({
+    ...row,
+    trainers: row.trainer_id ? { id: row.trainer_id, full_name: row.trainer_name ?? '' } : null,
+  }))
+
+  const upcomingRenewalsRows = (batchResults[13]?.results ?? []) as (Member & { plan_name?: string | null })[]
+  const upcomingRenewals = upcomingRenewalsRows.map((row) => ({
+    ...row,
+    membership_plans: row.plan_id ? { id: row.plan_id, name: row.plan_name ?? '' } : null,
+  })) as Member[]
 
   return {
     todayStart,
@@ -660,23 +681,13 @@ export async function getDashboardData() {
       membership_plans: row.plan_name ? { name: row.plan_name } : null,
     })),
     recentCheckins,
-    recentPayments: recentPayments.map((row) => ({
-      ...row,
-      members: row.member_id ? { id: row.member_id, full_name: row.member_name ?? '' } : null,
-    })),
+    recentPayments,
     recentMembers,
     recentClasses: recentClasses.map((row) => ({
       ...row,
-      trainers: row.trainer_id
-        ? { id: row.trainer_id, full_name: row.trainer_name ?? '' }
-        : null,
+      trainers: row.trainers,
     })),
-    upcomingRenewals: upcomingRenewals.map((row) => ({
-      ...row,
-      membership_plans: row.plan_id
-        ? { id: row.plan_id, name: row.plan_name ?? '' }
-        : null,
-    })) as Member[],
+    upcomingRenewals,
   }
 }
 
