@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness World Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    :root {
+      --color-border-primary: #e2e8f0;
+      --color-border-secondary: #cbd5e1;
+      --color-border-tertiary: #e2e8f0;
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f8fafc;
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-tertiary: #94a3b8;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: #f1f5f9;
+      color: var(--color-text-primary);
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 700px;
+    }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--color-border-tertiary);
+      padding: 24px 0;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      padding: 0 24px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .sidebar-item:hover {
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+    }
+
+    .sidebar-item.active {
+      color: #185FA5;
+      border-left-color: #185FA5;
+      background: #f0f7ff;
+      font-weight: 600;
+    }
+
+    .sidebar-item i {
+      font-size: 20px;
+    }
+
+    .main {
+      flex: 1;
+      padding: 32px;
+      background: #ffffff;
+      overflow-y: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .topbar h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--border-radius-md);
+      border: 1px solid var(--color-border-secondary);
+      background: var(--color-background-primary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--color-background-secondary);
+      border-color: #cbd5e1;
+    }
+
+    .btn-primary {
+      background: #185FA5;
+      color: #ffffff;
+      border-color: #185FA5;
+    }
+
+    .btn-primary:hover {
+      background: #12477c;
+      border-color: #12477c;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #ef4444;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric {
+      background: var(--color-background-secondary);
+      border: 1px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      padding: 20px;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .metric-sub {
+      font-size: 12px;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card {
+      background: var(--color-background-primary);
+      border: 1px solid var(--color-border-tertiary);
+      border-radius: var(--border-radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--color-text-secondary);
+      font-weight: 600;
+      border-bottom: 1px solid var(--color-border-tertiary);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border-tertiary);
+      color: var(--color-text-primary);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #fafafa;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .badge-active, .badge-green {
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .badge-pending, .badge-amber {
+      background: #fef7e0;
+      color: #b06000;
+    }
+
+    .badge-expired, .badge-red, .badge-overdue {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    .badge-blue, .badge-frozen {
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 8px 14px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      font-size: 13px;
+    }
+
+    select, textarea {
+      padding: 8px 12px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: #0369a1;
+      flex-shrink: 0;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border-tertiary);
+      font-size: 13px;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-bg.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--color-background-primary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      padding: 24px;
+      width: 420px;
+      max-width: 90%;
+      animation: slideUp 0.25s ease-out;
+    }
+
+    .modal h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+
+    .form-row {
+      margin-bottom: 16px;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+      font-size: 13px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    .relative {
+      position: relative;
+    }
+
+    .bar-wrap {
+      background: #e2e8f0;
+      border-radius: 4px;
+      height: 8px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: #185FA5;
+      transition: width 0.3s ease;
+    }
+
+    .trend-up {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .trend-down {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    /* Toast styles */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #1e293b;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-success {
+      border-left: 4px solid #10b981;
+    }
+
+    .toast-error {
+      border-left: 4px solid #ef4444;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<h2 class="sr-only">Fitness World Admin Dashboard — manage members, payments, trainers, attendance, and reports</h2>
+
+<div class="wrap">
+  <div class="relative">
+    <div class="layout">
+      <!-- SIDEBAR -->
+      <nav class="sidebar">
+        <div class="sidebar-brand">Fitness World</div>
+        <div class="sidebar-item active" onclick="showSection('dashboard', this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+        <div class="sidebar-item" onclick="showSection('members', this)"><i class="ti ti-users"></i> Members</div>
+        <div class="sidebar-item" onclick="showSection('payments', this)"><i class="ti ti-wallet"></i> Payments</div>
+        <div class="sidebar-item" onclick="showSection('attendance', this)"><i class="ti ti-calendar-check"></i> Attendance</div>
+        <div class="sidebar-item" onclick="showSection('trainers', this)"><i class="ti ti-user-check"></i> Trainers</div>
+        <div class="sidebar-item" onclick="showSection('classes', this)"><i class="ti ti-run"></i> Classes</div>
+        <div style="margin-top: auto; padding: 24px 16px 0; border-top: 1px solid var(--color-border-tertiary);">
+          <div class="sidebar-item" style="padding: 8px 0" onclick="showSection('settings', this)"><i class="ti ti-settings"></i> Settings</div>
+        </div>
+      </nav>
+
+      <!-- MAIN CONTENT -->
+      <div class="main">
+
+        <!-- DASHBOARD SECTION -->
+        <div class="section active" id="sec-dashboard">
+          <div class="topbar">
+            <h2>Overview</h2>
+            <span id="overview-date" style="font-size:13px; color:var(--color-text-secondary)">June 2026</span>
+          </div>
+          <div class="metrics">
+            <div class="metric">
+              <div class="metric-label">Total members</div>
+              <div class="metric-value" id="metric-total-members">0</div>
+              <div class="metric-sub trend-up"><i class="ti ti-trending-up"></i> Active & On hold</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Revenue (June)</div>
+              <div class="metric-value" id="metric-revenue">₹0</div>
+              <div class="metric-sub trend-up"><i class="ti ti-trending-up"></i> Total collected</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Check-ins today</div>
+              <div class="metric-value" id="metric-checkins">0</div>
+              <div class="metric-sub trend-down"><i class="ti ti-run"></i> Active today</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Overdue payments</div>
+              <div class="metric-value" id="metric-overdue" style="color: #ef4444;">0</div>
+              <div class="metric-sub trend-down"><i class="ti ti-alert-triangle"></i> Action required</div>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Membership breakdown</span></div>
+              <div id="breakdown-list">
+                <!-- Dynamic breakdown -->
+              </div>
+              <div style="margin-top:1.5rem">
+                <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">Capacity utilization</div>
+                <div class="bar-wrap"><div class="bar-fill" id="capacity-bar" style="width:0%"></div></div>
+                <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:4px" id="capacity-text">0/400 slots filled (0%)</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Recent activity</span></div>
+              <div id="recent-activity-list">
+                <!-- Dynamic activity -->
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><span class="card-title">Upcoming renewals (next 7 days)</span></div>
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Plan</th>
+                  <th>Expiry</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="upcoming-renewals-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MEMBERS SECTION -->
+        <div class="section" id="sec-members">
+          <div class="topbar">
+            <h2>Members</h2>
+            <button class="btn btn-primary" onclick="openAddMemberModal()"><i class="ti ti-plus"></i> Add member</button>
+          </div>
+          <div class="search-bar">
+            <input type="text" placeholder="Search by name, phone, email…" id="member-search" oninput="filterMembers()">
+            <select id="member-filter" onchange="filterMembers()">
+              <option value="">All plans</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Annual">Annual</option>
+              <option value="PT">PT sessions</option>
+            </select>
+            <select id="status-filter" onchange="filterMembers()">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="overdue">Overdue</option>
+              <option value="frozen">Frozen</option>
+            </select>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table id="member-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Phone</th>
+                  <th>Plan</th>
+                  <th>Joined</th>
+                  <th>Expiry</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="member-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PAYMENTS SECTION -->
+        <div class="section" id="sec-payments">
+          <div class="topbar">
+            <h2>Payments</h2>
+            <button class="btn btn-primary" onclick="openPaymentModal()"><i class="ti ti-plus"></i> Record payment</button>
+          </div>
+          <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+            <div class="metric">
+              <div class="metric-label">Collected this month</div>
+              <div class="metric-value" id="payment-metric-collected">₹0</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Pending / Overdue</div>
+              <div class="metric-value" id="payment-metric-pending" style="color:#ef4444;">₹0</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Total Transactions</div>
+              <div class="metric-value" id="payment-metric-transactions">0</div>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Amount</th>
+                  <th>Plan</th>
+                  <th>Date</th>
+                  <th>Mode</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ATTENDANCE SECTION -->
+        <div class="section" id="sec-attendance">
+          <div class="topbar">
+            <h2>Attendance</h2>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="attendance-member-select" style="max-width:200px;">
+                <option value="">Select Member to Check-in</option>
+              </select>
+              <button class="btn btn-primary" onclick="checkInMember()">Check-in</button>
+            </div>
+          </div>
+          <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+            <div class="metric">
+              <div class="metric-label">Check-ins today</div>
+              <div class="metric-value" id="attendance-metric-today">0</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Peak hour</div>
+              <div class="metric-value">6–9 AM</div>
+            </div>
+            <div class="metric">
+              <div class="metric-label">Weekly Average</div>
+              <div class="metric-value">42</div>
+            </div>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Check-in Time</th>
+                  <th>Check-out Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TRAINERS SECTION -->
+        <div class="section" id="sec-trainers">
+          <div class="topbar">
+            <h2>Trainers</h2>
+            <button class="btn btn-primary" onclick="openAddTrainerModal()"><i class="ti ti-plus"></i> Add trainer</button>
+          </div>
+          <div class="grid2" id="trainers-grid">
+            <!-- Dynamic cards -->
+          </div>
+        </div>
+
+        <!-- CLASSES SECTION -->
+        <div class="section" id="sec-classes">
+          <div class="topbar">
+            <h2>Classes</h2>
+            <button class="btn btn-primary" onclick="openAddClassModal()"><i class="ti ti-plus"></i> Add class</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Trainer</th>
+                  <th>Schedule</th>
+                  <th>Capacity</th>
+                  <th>Enrolled</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="classes-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SETTINGS SECTION -->
+        <div class="section" id="sec-settings">
+          <div class="topbar"><h2>Settings</h2></div>
+          <div class="grid2">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:1rem">Gym details</div>
+              <form id="settings-gym-form" onsubmit="saveGymDetails(event)">
+                <div class="form-row">
+                  <label>Gym name</label>
+                  <input type="text" id="settings-gym-name" required>
+                </div>
+                <div class="form-row">
+                  <label>Location</label>
+                  <input type="text" id="settings-location" required>
+                </div>
+                <div class="form-row">
+                  <label>Contact phone</label>
+                  <input type="text" id="settings-phone" required>
+                </div>
+                <div class="form-row">
+                  <label>Email</label>
+                  <input type="email" id="settings-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top:4px">Save changes</button>
+              </form>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:1rem">Membership pricing</div>
+              <div class="stat-row"><span>Monthly</span><span style="font-weight:600">₹1,500</span></div>
+              <div class="stat-row"><span>Quarterly</span><span style="font-weight:600">₹4,000</span></div>
+              <div class="stat-row"><span>Annual</span><span style="font-weight:600">₹12,000</span></div>
+              <div class="stat-row"><span>PT session (5x)</span><span style="font-weight:600">₹2,500</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="margin-bottom:1rem">Notification settings</div>
+            <form id="settings-notifications-form" onsubmit="saveNotificationSettings(event)">
+              <div class="form-row" style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="settings-email-reminders" style="width: auto; margin: 0;">
+                <label for="settings-email-reminders" style="margin: 0; font-weight: 600; cursor: pointer;">Enable automated email notifications (Welcome & Expiry reminders)</label>
+              </div>
+              <div class="form-row">
+                <label>7 Days Before Expiry Template</label>
+                <textarea id="settings-template-7days" rows="3" placeholder="Enter template for 7-day reminder..."></textarea>
+              </div>
+              <div class="form-row">
+                <label>Expiry Date Template</label>
+                <textarea id="settings-template-today" rows="3" placeholder="Enter template for today's expiry..."></textarea>
+              </div>
+              <div class="mb-4 p-3 bg-muted/40 rounded-lg border border-border/60">
+                <p style="font-size: 11px; font-weight: bold; color: var(--color-text-secondary); margin-bottom: 4px; text-transform: uppercase;">
+                  Template Placeholders:
+                </p>
+                <div style="font-size: 11px; color: var(--color-text-secondary); display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                  <div><code>{name}</code> - Member's full name</div>
+                  <div><code>{plan}</code> - Selected membership plan</div>
+                  <div><code>{expiry_date}</code> - Expiry date of the membership</div>
+                  <div><code>{gym_name}</code> - Your gym name</div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Save notification settings</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MEMBER MODAL (ADD & EDIT) -->
+    <div class="modal-bg" id="member-modal">
+      <div class="modal">
+        <h3 id="member-modal-title">Add new member</h3>
+        <form id="member-form" onsubmit="handleMemberSubmit(event)">
+          <input type="hidden" id="member-id">
+          <div class="form-row">
+            <label>Full name</label>
+            <input type="text" id="member-name" placeholder="e.g. Rahul Sharma" required>
+          </div>
+          <div class="form-row">
+            <label>Phone</label>
+            <input type="text" id="member-phone" placeholder="+91 98765 43210" required>
+          </div>
+          <div class="form-row">
+            <label>Email (optional)</label>
+            <input type="email" id="member-email" placeholder="rahul@email.com">
+          </div>
+          <div class="form-row">
+            <label>Membership plan</label>
+            <select id="member-plan" required>
+              <option value="Monthly">Monthly (₹1,500)</option>
+              <option value="Quarterly">Quarterly (₹4,000)</option>
+              <option value="Annual">Annual (₹12,000)</option>
+              <option value="PT">PT sessions (₹2,500)</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Status</label>
+            <select id="member-status" required>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="overdue">Overdue</option>
+              <option value="frozen">Frozen</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Join date</label>
+            <input type="date" id="member-join-date" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn" onclick="closeMemberModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="member-submit-btn">Add member</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- RECORD PAYMENT MODAL -->
+    <div class="modal-bg" id="add-payment-modal">
+      <div class="modal">
+        <h3>Record payment</h3>
+        <form id="payment-form" onsubmit="handlePaymentSubmit(event)">
+          <div class="form-row">
+            <label>Select Member</label>
+            <select id="payment-member-select" required></select>
+          </div>
+          <div class="form-row">
+            <label>Amount (₹)</label>
+            <input type="number" id="payment-amount" placeholder="1500" required>
+          </div>
+          <div class="form-row">
+            <label>Plan</label>
+            <select id="payment-plan" required>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Annual">Annual</option>
+              <option value="PT">PT sessions</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Payment mode</label>
+            <select id="payment-mode" required>
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank transfer">Bank transfer</option>
+              <option value="Card">Card</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label>Date</label>
+            <input type="date" id="payment-date" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn" onclick="closePaymentModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Record</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TRAINER MODAL -->
+    <div class="modal-bg" id="trainer-modal">
+      <div class="modal">
+        <h3>Add new trainer</h3>
+        <form id="trainer-form" onsubmit="handleTrainerSubmit(event)">
+          <div class="form-row">
+            <label>Full name</label>
+            <input type="text" id="trainer-name" placeholder="e.g. Vikas Sharma" required>
+          </div>
+          <div class="form-row">
+            <label>Specialization</label>
+            <input type="text" id="trainer-specialization" placeholder="e.g. Strength & Conditioning" required>
+          </div>
+          <div class="form-row">
+            <label>Rating</label>
+            <input type="number" id="trainer-rating" step="0.1" min="1" max="5" value="5.0" required>
+          </div>
+          <div class="form-row" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="trainer-active" style="width: auto; margin: 0;" checked>
+            <label for="trainer-active" style="margin: 0; cursor: pointer;">Active</label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn" onclick="closeTrainerModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add trainer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- CLASS MODAL -->
+    <div class="modal-bg" id="class-modal">
+      <div class="modal">
+        <h3>Add new class</h3>
+        <form id="class-form" onsubmit="handleClassSubmit(event)">
+          <div class="form-row">
+            <label>Class Name</label>
+            <input type="text" id="class-name" placeholder="e.g. Zumba" required>
+          </div>
+          <div class="form-row">
+            <label>Trainer</label>
+            <select id="class-trainer-select" required></select>
+          </div>
+          <div class="form-row">
+            <label>Schedule</label>
+            <input type="text" id="class-schedule" placeholder="e.g. Mon/Wed/Fri 7 AM" required>
+          </div>
+          <div class="form-row">
+            <label>Capacity</label>
+            <input type="number" id="class-capacity" value="20" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn" onclick="closeClassModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add class</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// --- TOAST NOTIFICATIONS ---
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<i class="ti ${type === 'success' ? 'ti-check' : 'ti-alert-triangle'}"></i> ` + message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// --- DEFAULT SEED DATA ---
+const DEFAULT_SETTINGS = {
+  gym_name: "Atharva's Fitness World",
+  location: "Amravati, Maharashtra",
+  phone: "+91 98765 43210",
+  email: "admin@fitnessworld.in",
+  email_reminders_enabled: true,
+  reminder_template_7_days: "Hello {name}, your {plan} membership at {gym_name} will expire in 7 days on {expiry_date}. Please renew it to continue using our services.",
+  reminder_template_today: "Hello {name}, your {plan} membership at {gym_name} expires today on {expiry_date}. Please renew it to continue using our services."
+};
+
+const DEFAULT_MEMBERS = [
+  {id: "m1", full_name: "Rohit Kumar", phone: "9800111234", email: "rohit@example.com", plan_name: "Monthly", join_date: "2026-01-15", membership_start: "2026-05-27", membership_end: getRelativeDate(2), status: "active"},
+  {id: "m2", full_name: "Sunita Patil", phone: "9800222345", email: "sunita@example.com", plan_name: "Quarterly", join_date: "2026-03-28", membership_start: "2026-03-28", membership_end: getRelativeDate(4), status: "active"},
+  {id: "m3", full_name: "Arjun Desai", phone: "9800333456", email: "arjun@example.com", plan_name: "Annual", join_date: "2025-07-01", membership_start: "2025-07-01", membership_end: getRelativeDate(6), status: "active"},
+  {id: "m4", full_name: "Meera S.", phone: "9800444567", email: "meera@example.com", plan_name: "Monthly", join_date: "2026-02-20", membership_start: "2026-05-20", membership_end: getRelativeDate(-4), status: "overdue"},
+  {id: "m5", full_name: "Amit Joshi", phone: "9800555678", email: "amit@example.com", plan_name: "Annual", join_date: "2025-06-20", membership_start: "2025-06-20", membership_end: getRelativeDate(30), status: "active"},
+  {id: "m6", full_name: "Priya Verma", phone: "9800666789", email: "priya@example.com", plan_name: "Monthly", join_date: "2026-05-24", membership_start: "2026-05-24", membership_end: getRelativeDate(0), status: "active"},
+  {id: "m7", full_name: "Nikhil K.", phone: "9800777890", email: "nikhil@example.com", plan_name: "Quarterly", join_date: "2026-04-10", membership_start: "2026-04-10", membership_end: getRelativeDate(15), status: "active"},
+  {id: "m8", full_name: "Sneha K.", phone: "9800888901", email: "sneha@example.com", plan_name: "Monthly", join_date: "2025-12-01", membership_start: "2026-05-01", membership_end: getRelativeDate(-10), status: "expired"},
+  {id: "m9", full_name: "Ritu D.", phone: "9800999012", email: "ritu@example.com", plan_name: "Monthly", join_date: "2026-03-15", membership_start: "2026-05-15", membership_end: getRelativeDate(-2), status: "overdue"},
+  {id: "m10", full_name: "Suresh T.", phone: "9801000123", email: "suresh@example.com", plan_name: "PT", join_date: "2026-06-01", membership_start: "2026-06-01", membership_end: getRelativeDate(90), status: "active"}
+];
+
+const DEFAULT_PAYMENTS = [
+  {id: "p1", member_id: "m6", member_name: "Priya Verma", amount: 1500, plan_name: "Monthly", date: getRelativeDate(0), mode: "UPI", status: "paid"},
+  {id: "p2", member_id: "m7", member_name: "Nikhil K.", amount: 4000, plan_name: "Quarterly", date: getRelativeDate(-1), mode: "Cash", status: "paid"},
+  {id: "p3", member_id: "m4", member_name: "Meera S.", amount: 1500, plan_name: "Monthly", date: getRelativeDate(-4), mode: "—", status: "overdue"},
+  {id: "p4", member_id: "m5", member_name: "Amit Joshi", amount: 12000, plan_name: "Annual", date: getRelativeDate(-6), mode: "Bank transfer", status: "paid"},
+  {id: "p5", member_id: "m9", member_name: "Ritu D.", amount: 1500, plan_name: "Monthly", date: getRelativeDate(-9), mode: "—", status: "pending"},
+  {id: "p6", member_id: "m10", member_name: "Suresh T.", amount: 2500, plan_name: "PT", date: getRelativeDate(-12), mode: "UPI", status: "paid"}
+];
+
+const DEFAULT_ATTENDANCE = [
+  {id: "a1", member_id: "m1", member_name: "Rohit Kumar", check_in: "09:12 AM", check_out: "10:45 AM", duration: "1h 33m", date: getRelativeDate(0)},
+  {id: "a2", member_id: "m2", member_name: "Sunita Patil", check_in: "08:00 AM", check_out: "09:30 AM", duration: "1h 30m", date: getRelativeDate(0)},
+  {id: "a3", member_id: "m3", member_name: "Arjun Desai", check_in: "07:15 AM", check_out: "08:50 AM", duration: "1h 35m", date: getRelativeDate(0)},
+  {id: "a4", member_id: "m7", member_name: "Nikhil K.", check_in: "06:30 AM", check_out: "07:45 AM", duration: "1h 15m", date: getRelativeDate(0)},
+  {id: "a5", member_id: "m6", member_name: "Priya Verma", check_in: "06:00 AM", check_out: "07:20 AM", duration: "1h 20m", date: getRelativeDate(0)}
+];
+
+const DEFAULT_TRAINERS = [
+  {id: "t1", full_name: "Vikas Sharma", specialization: "Strength & Conditioning", is_active: true, clients: 14, classes_week: 6, rating: 4.8},
+  {id: "t2", full_name: "Pooja Deshpande", specialization: "Yoga & Flexibility", is_active: true, clients: 18, classes_week: 8, rating: 4.9},
+  {id: "t3", full_name: "Ravi Bhosale", specialization: "Cardio & Weight Loss", is_active: false, clients: 9, classes_week: 0, rating: 4.6}
+];
+
+const DEFAULT_CLASSES = [
+  {id: "c1", name: "Yoga Flow", trainer: "Pooja Deshpande", schedule: "Mon/Wed/Fri 7 AM", capacity: 20, enrolled: 18, status: "Running"},
+  {id: "c2", name: "HIIT Blast", trainer: "Vikas Sharma", schedule: "Tue/Thu 6 AM", capacity: 15, enrolled: 15, status: "Full"},
+  {id: "c3", name: "Zumba", trainer: "Pooja Deshpande", schedule: "Sat 9 AM", capacity: 25, enrolled: 12, status: "Running"},
+  {id: "c4", name: "Power Lifting", trainer: "Vikas Sharma", schedule: "Mon/Wed 5 PM", capacity: 10, enrolled: 8, status: "Running"},
+  {id: "c5", name: "Cardio Circuit", trainer: "Ravi Bhosale", schedule: "Daily 8 AM", capacity: 20, enrolled: 0, status: "Paused"}
+];
+
+function getRelativeDate(daysOffset) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysOffset);
+  return d.toISOString().split('T')[0];
+}
+
+// --- DATA ACCESSORS (LOCAL STORAGE) ---
+function loadData(key, fallback) {
+  const val = localStorage.getItem(key);
+  if (!val) {
+    localStorage.setItem(key, JSON.stringify(fallback));
+    return fallback;
+  }
+  return JSON.parse(val);
+}
+
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+let members = loadData('fw_members', DEFAULT_MEMBERS);
+let payments = loadData('fw_payments', DEFAULT_PAYMENTS);
+let attendance = loadData('fw_attendance', DEFAULT_ATTENDANCE);
+let trainers = loadData('fw_trainers', DEFAULT_TRAINERS);
+let classes = loadData('fw_classes', DEFAULT_CLASSES);
+let settings = loadData('fw_settings', DEFAULT_SETTINGS);
+
+// --- APP RENDERERS ---
+function init() {
+  document.getElementById('member-join-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('payment-date').value = new Date().toISOString().split('T')[0];
+  
+  // Set dates in Overview
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const currentMonth = months[new Date().getMonth()] + " " + new Date().getFullYear();
+  document.getElementById('overview-date').innerText = currentMonth;
+
+  renderDashboard();
+  renderMembersTable();
+  renderPaymentsTable();
+  renderAttendanceTable();
+  renderTrainers();
+  renderClasses();
+  populateSettingsForm();
+  populateMemberDropdowns();
+}
+
+function renderDashboard() {
+  // Update Metrics
+  const activeCount = members.filter(m => m.status === 'active').length;
+  document.getElementById('metric-total-members').innerText = members.length;
+  document.getElementById('metric-checkins').innerText = attendance.filter(a => a.date === getRelativeDate(0)).length;
+  document.getElementById('metric-overdue').innerText = members.filter(m => m.status === 'overdue').length;
+
+  const currentMonthStr = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const monthRevenue = payments
+    .filter(p => p.status === 'paid' && p.date.startsWith(currentMonthStr))
+    .reduce((sum, p) => sum + p.amount, 0);
+  document.getElementById('metric-revenue').innerText = '₹' + monthRevenue.toLocaleString('en-IN');
+
+  // Membership breakdown
+  const counts = { Monthly: 0, Quarterly: 0, Annual: 0, PT: 0 };
+  members.forEach(m => {
+    if (counts[m.plan_name] !== undefined) counts[m.plan_name]++;
+  });
+
+  document.getElementById('breakdown-list').innerHTML = `
+    <div class="stat-row"><span>Monthly plan</span><span style="font-weight:600">${counts.Monthly}</span></div>
+    <div class="stat-row"><span>Quarterly plan</span><span style="font-weight:600">${counts.Quarterly}</span></div>
+    <div class="stat-row"><span>Annual plan</span><span style="font-weight:600">${counts.Annual}</span></div>
+    <div class="stat-row"><span>PT sessions</span><span style="font-weight:600">${counts.PT}</span></div>
+  `;
+
+  const capPercentage = Math.round((members.length / 400) * 100);
+  document.getElementById('capacity-bar').style.width = `${capPercentage}%`;
+  document.getElementById('capacity-text').innerText = `${members.length}/400 slots filled (${capPercentage}%)`;
+
+  // Recent activity
+  const sortedAttendance = [...attendance].sort((a,b) => b.check_in.localeCompare(a.check_in)).slice(0, 2);
+  const sortedPayments = [...payments].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 2);
+  const activities = [];
+  
+  sortedAttendance.forEach(a => activities.push({ text: `${a.member_name} checked in`, sub: a.check_in }));
+  sortedPayments.forEach(p => activities.push({ text: `${p.member_name} — payment ${p.status} ₹${p.amount}`, sub: p.date }));
+  
+  document.getElementById('recent-activity-list').innerHTML = activities.map(act => `
+    <div class="stat-row"><span>${act.text}</span><span style="font-size:12px;color:var(--color-text-tertiary)">${act.sub}</span></div>
+  `).join('');
+
+  // Upcoming renewals (expiring within next 7 days)
+  const todayVal = new Date().setHours(0,0,0,0);
+  const sevenDaysLaterVal = todayVal + (7 * 24 * 60 * 60 * 1000);
+  const rawUpcoming = members.filter(m => {
+    if (!m.membership_end) return false;
+    const endVal = new Date(m.membership_end).getTime();
+    return endVal >= todayVal && endVal <= sevenDaysLaterVal;
+  });
+
+  const upcomingRenewalsHTML = rawUpcoming.map(m => {
+    const initials = m.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    return `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="avatar">${initials}</div>
+            ${m.full_name}
+          </div>
+        </td>
+        <td>${m.plan_name}</td>
+        <td>${formatShortDate(m.membership_end)}</td>
+        <td><span class="badge badge-amber">Expiring soon</span></td>
+        <td>
+          <button class="btn" onclick="sendWhatsAppReminder('${m.id}', 7)">Remind ↗</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('upcoming-renewals-tbody').innerHTML = upcomingRenewalsHTML || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary)">No upcoming renewals</td></tr>';
+}
+
+function renderMembersTable() {
+  const tbody = document.getElementById('member-tbody');
+  tbody.innerHTML = '';
+
+  const q = document.getElementById('member-search').value.toLowerCase();
+  const plan = document.getElementById('member-filter').value;
+  const status = document.getElementById('status-filter').value;
+
+  const filtered = members.filter(m => {
+    const matchesQuery = !q || m.full_name.toLowerCase().includes(q) || (m.phone || '').includes(q) || (m.email || '').toLowerCase().includes(q);
+    const matchesPlan = !plan || m.plan_name === plan;
+    const matchesStatus = !status || m.status === status;
+    return matchesQuery && matchesPlan && matchesStatus;
+  });
+
+  tbody.innerHTML = filtered.map(m => {
+    const initials = m.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const badgeClass = m.status === 'active' ? 'badge-green' : (m.status === 'expired' || m.status === 'overdue' ? 'badge-red' : 'badge-amber');
+    return `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="avatar">${initials}</div>
+            ${m.full_name}
+          </div>
+        </td>
+        <td>${m.phone || '—'}</td>
+        <td>${m.plan_name || '—'}</td>
+        <td>${formatShortDate(m.join_date)}</td>
+        <td>${formatShortDate(m.membership_end)}</td>
+        <td><span class="badge ${badgeClass}">${m.status}</span></td>
+        <td>
+          <div style="display:flex; gap: 8px;">
+            <button class="btn" style="padding: 4px 8px;" onclick="openEditMemberModal('${m.id}')">Edit</button>
+            <button class="btn" style="padding: 4px 8px;" onclick="sendWhatsAppReminder('${m.id}')">Remind ↗</button>
+            <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteMember('${m.id}')"><i class="ti ti-trash"></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderPaymentsTable() {
+  const tbody = document.getElementById('payments-tbody');
+  tbody.innerHTML = payments.map(p => {
+    const initials = p.member_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const badgeClass = p.status === 'paid' ? 'badge-green' : (p.status === 'overdue' ? 'badge-red' : 'badge-amber');
+    return `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="avatar">${initials}</div>
+            ${p.member_name}
+          </div>
+        </td>
+        <td>₹${p.amount.toLocaleString('en-IN')}</td>
+        <td>${p.plan_name}</td>
+        <td>${formatShortDate(p.date)}</td>
+        <td>${p.mode}</td>
+        <td><span class="badge ${badgeClass}">${p.status}</span></td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update payments metrics
+  const currentMonthStr = new Date().toISOString().slice(0, 7);
+  const collected = payments.filter(p => p.status === 'paid' && p.date.startsWith(currentMonthStr)).reduce((sum, p) => sum + p.amount, 0);
+  const pending = payments.filter(p => p.status !== 'paid').reduce((sum, p) => sum + p.amount, 0);
+  
+  document.getElementById('payment-metric-collected').innerText = '₹' + collected.toLocaleString('en-IN');
+  document.getElementById('payment-metric-pending').innerText = '₹' + pending.toLocaleString('en-IN');
+  document.getElementById('payment-metric-transactions').innerText = payments.length;
+}
+
+function renderAttendanceTable() {
+  const tbody = document.getElementById('attendance-tbody');
+  tbody.innerHTML = '';
+  
+  const today = getRelativeDate(0);
+  const todayAttendance = attendance.filter(a => a.date === today);
+  
+  document.getElementById('attendance-metric-today').innerText = todayAttendance.length;
+
+  tbody.innerHTML = todayAttendance.map(a => `
+    <tr>
+      <td>${a.member_name}</td>
+      <td>${a.check_in}</td>
+      <td>${a.check_out || '—'}</td>
+      <td>
+        ${!a.check_out ? `<button class="btn" onclick="checkOutMember('${a.id}')">Check-out</button>` : `<span class="text-muted-foreground">Completed</span>`}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderTrainers() {
+  const grid = document.getElementById('trainers-grid');
+  grid.innerHTML = trainers.map(t => {
+    const initials = t.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const badgeClass = t.is_active ? 'badge-green' : 'badge-amber';
+    const statusText = t.is_active ? 'Active' : 'Inactive';
+    return `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div class="avatar" style="width:40px;height:40px;font-size:14px;background:#E1F5EE;color:#0F6E56">${initials}</div>
+          <div>
+            <div style="font-weight:600;font-size:15px">${t.full_name}</div>
+            <div style="font-size:12px;color:var(--color-text-secondary)">${t.specialization}</div>
+          </div>
+          <span class="badge ${badgeClass}" style="margin-left:auto">${statusText}</span>
+        </div>
+        <div class="stat-row"><span style="color:var(--color-text-secondary)">Clients</span><span>${t.clients}</span></div>
+        <div class="stat-row"><span style="color:var(--color-text-secondary)">Classes/week</span><span>${t.classes_week}</span></div>
+        <div class="stat-row"><span style="color:var(--color-text-secondary)">Rating</span><span>${t.rating} ⭐</span></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-danger" style="font-size:12px" onclick="deleteTrainer('${t.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderClasses() {
+  const tbody = document.getElementById('classes-tbody');
+  tbody.innerHTML = classes.map(c => `
+    <tr>
+      <td>${c.name}</td>
+      <td>${c.trainer}</td>
+      <td>${c.schedule}</td>
+      <td>${c.capacity}</td>
+      <td>${c.enrolled}</td>
+      <td><span class="badge ${c.status === 'Running' ? 'badge-green' : c.status === 'Full' ? 'badge-blue' : 'badge-amber'}">${c.status}</span></td>
+      <td>
+        <button class="btn btn-danger" style="font-size:12px" onclick="deleteClass('${c.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function populateSettingsForm() {
+  document.getElementById('settings-gym-name').value = settings.gym_name;
+  document.getElementById('settings-location').value = settings.location || '';
+  document.getElementById('settings-phone').value = settings.phone || '';
+  document.getElementById('settings-email').value = settings.email || '';
+
+  document.getElementById('settings-email-reminders').checked = settings.email_reminders_enabled;
+  document.getElementById('settings-template-7days').value = settings.reminder_template_7_days || '';
+  document.getElementById('settings-template-today').value = settings.reminder_template_today || '';
+}
+
+function populateMemberDropdowns() {
+  const mSelect = document.getElementById('payment-member-select');
+  mSelect.innerHTML = '<option value="">Select Member</option>' + 
+    members.map(m => `<option value="${m.id}">${m.full_name}</option>`).join('');
+
+  const attSelect = document.getElementById('attendance-member-select');
+  attSelect.innerHTML = '<option value="">Select Member to Check-in</option>' +
+    members.map(m => `<option value="${m.id}">${m.full_name}</option>`).join('');
+
+  const classTrainerSelect = document.getElementById('class-trainer-select');
+  classTrainerSelect.innerHTML = '<option value="">Select Trainer</option>' +
+    trainers.map(t => `<option value="${t.full_name}">${t.full_name}</option>`).join('');
+}
+
+// --- APP ACTIONS ---
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// MODAL WINDOW MANAGEMENT
+function openAddMemberModal() {
+  document.getElementById('member-modal-title').innerText = "Add new member";
+  document.getElementById('member-id').value = "";
+  document.getElementById('member-name').value = "";
+  document.getElementById('member-phone').value = "";
+  document.getElementById('member-email').value = "";
+  document.getElementById('member-plan').value = "Monthly";
+  document.getElementById('member-status').value = "active";
+  document.getElementById('member-join-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('member-submit-btn').innerText = "Add member";
+  document.getElementById('member-modal').classList.add('open');
+}
+
+function openEditMemberModal(id) {
+  const m = members.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('member-modal-title').innerText = "Edit member";
+  document.getElementById('member-id').value = m.id;
+  document.getElementById('member-name').value = m.full_name;
+  document.getElementById('member-phone').value = m.phone || '';
+  document.getElementById('member-email').value = m.email || '';
+  document.getElementById('member-plan').value = m.plan_name || 'Monthly';
+  document.getElementById('member-status').value = m.status;
+  document.getElementById('member-join-date').value = m.join_date;
+  document.getElementById('member-submit-btn').innerText = "Save changes";
+  document.getElementById('member-modal').classList.add('open');
+}
+
+function closeMemberModal() {
+  document.getElementById('member-modal').classList.remove('open');
+}
+
+function handleMemberSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('member-id').value;
+  const name = document.getElementById('member-name').value;
+  const phone = document.getElementById('member-phone').value;
+  const email = document.getElementById('member-email').value;
+  const plan = document.getElementById('member-plan').value;
+  const status = document.getElementById('member-status').value;
+  const joinDate = document.getElementById('member-join-date').value;
+
+  // Calculate Expiry Date
+  let days = 30;
+  if (plan === 'Quarterly') days = 90;
+  if (plan === 'Annual') days = 365;
+  if (plan === 'PT') days = 90;
+
+  const d = new Date(joinDate);
+  d.setDate(d.getDate() + days);
+  const expiryDate = d.toISOString().split('T')[0];
+
+  if (id) {
+    // Edit existing member
+    members = members.map(m => m.id === id ? {
+      ...m,
+      full_name: name,
+      phone,
+      email,
+      plan_name: plan,
+      status,
+      join_date: joinDate,
+      membership_start: joinDate,
+      membership_end: expiryDate
+    } : m);
+    showToast('Member details updated');
+  } else {
+    // Add new member
+    const newId = 'm' + (Date.now());
+    const newMember = {
+      id: newId,
+      full_name: name,
+      phone,
+      email,
+      plan_name: plan,
+      join_date: joinDate,
+      membership_start: joinDate,
+      membership_end: expiryDate,
+      status
+    };
+    members.push(newMember);
+    showToast('New member added successfully!');
+
+    // WHATSAPP WELCOME FALLBACK: If they don't have email but have a phone number, trigger welcome message on WhatsApp!
+    if (!email && phone) {
+      const welcomeMessage = `Welcome to ${settings.gym_name}, ${name}! We're thrilled to have you join. Your ${plan} membership starts now and is valid until ${expiryDate}. Let's crush those fitness goals together!`;
+      let cleanPhone = phone.replace(/[^\d]/g, '');
+      if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
+      const wUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(welcomeMessage)}`;
+      window.open(wUrl, '_blank');
+    }
+  }
+
+  saveData('fw_members', members);
+  closeMemberModal();
+  init();
+}
+
+function deleteMember(id) {
+  if (confirm('Are you sure you want to delete this member?')) {
+    members = members.filter(m => m.id !== id);
+    saveData('fw_members', members);
+    showToast('Member removed', 'error');
+    init();
+  }
+}
+
+// PAYMENTS
+function openPaymentModal() {
+  document.getElementById('add-payment-modal').classList.add('open');
+}
+
+function closePaymentModal() {
+  document.getElementById('add-payment-modal').classList.remove('open');
+}
+
+function handlePaymentSubmit(e) {
+  e.preventDefault();
+  const mId = document.getElementById('payment-member-select').value;
+  const amount = parseFloat(document.getElementById('payment-amount').value);
+  const plan = document.getElementById('payment-plan').value;
+  const mode = document.getElementById('payment-mode').value;
+  const date = document.getElementById('payment-date').value;
+
+  const m = members.find(x => x.id === mId);
+  if (!m) return;
+
+  const newPayment = {
+    id: 'p' + Date.now(),
+    member_id: mId,
+    member_name: m.full_name,
+    amount,
+    plan_name: plan,
+    date,
+    mode,
+    status: 'paid'
+  };
+
+  payments.push(newPayment);
+  saveData('fw_payments', payments);
+
+  // Update member status to active upon payment
+  members = members.map(x => {
+    if (x.id === mId) {
+      // renew/activate membership
+      const d = new Date(date);
+      let days = 30;
+      if (plan === 'Quarterly') days = 90;
+      if (plan === 'Annual') days = 365;
+      if (plan === 'PT') days = 90;
+      d.setDate(d.getDate() + days);
+      return {
+        ...x,
+        status: 'active',
+        membership_start: date,
+        membership_end: d.toISOString().split('T')[0]
+      };
+    }
+    return x;
+  });
+  saveData('fw_members', members);
+
+  closePaymentModal();
+  showToast('Payment recorded, membership renewed!');
+  init();
+}
+
+// ATTENDANCE
+function checkInMember() {
+  const mId = document.getElementById('attendance-member-select').value;
+  if (!mId) return showToast('Please select a member', 'error');
+  
+  const m = members.find(x => x.id === mId);
+  if (!m) return;
+
+  const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const todayStr = getRelativeDate(0);
+
+  const newAttendance = {
+    id: 'a' + Date.now(),
+    member_id: mId,
+    member_name: m.full_name,
+    check_in: timeStr,
+    check_out: null,
+    duration: null,
+    date: todayStr
+  };
+
+  attendance.push(newAttendance);
+  saveData('fw_attendance', attendance);
+  showToast(`${m.full_name} checked in!`);
+  init();
+}
+
+function checkOutMember(id) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  attendance = attendance.map(a => {
+    if (a.id === id) {
+      // Calculate dynamic duration
+      let durationStr = '1h 00m';
+      try {
+        const todayStr = a.date || now.toISOString().split('T')[0];
+        const [time, modifier] = a.check_in.split(' ');
+        let [hours, minutes] = time.split(':').map(Number);
+        if (modifier === 'PM' && hours < 12) hours += 12;
+        if (modifier === 'AM' && hours === 12) hours = 0;
+        
+        const checkInTime = new Date(todayStr);
+        checkInTime.setHours(hours, minutes, 0, 0);
+        
+        const diffMs = now.getTime() - checkInTime.getTime();
+        if (diffMs > 0) {
+          const totalMinutes = Math.floor(diffMs / 60000);
+          const hrs = Math.floor(totalMinutes / 60);
+          const mins = totalMinutes % 60;
+          durationStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+        }
+      } catch (e) {
+        console.error('Error calculating duration', e);
+      }
+
+      return {
+        ...a,
+        check_out: timeStr,
+        duration: durationStr
+      }
+    }
+    return a;
+  });
+  saveData('fw_attendance', attendance);
+  showToast(`Checked out!`);
+  init();
+}
+
+// TRAINERS
+function openAddTrainerModal() {
+  document.getElementById('trainer-modal').classList.add('open');
+}
+
+function closeTrainerModal() {
+  document.getElementById('trainer-modal').classList.remove('open');
+}
+
+function handleTrainerSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('trainer-name').value;
+  const spec = document.getElementById('trainer-specialization').value;
+  const rating = parseFloat(document.getElementById('trainer-rating').value) || 5.0;
+  const is_active = document.getElementById('trainer-active').checked;
+
+  const newTrainer = {
+    id: 't' + Date.now(),
+    full_name: name,
+    specialization: spec,
+    is_active,
+    clients: 0,
+    classes_week: 0,
+    rating
+  };
+
+  trainers.push(newTrainer);
+  saveData('fw_trainers', trainers);
+  closeTrainerModal();
+  showToast('Trainer added successfully!');
+  init();
+}
+
+function deleteTrainer(id) {
+  if (confirm('Are you sure you want to remove this trainer?')) {
+    trainers = trainers.filter(t => t.id !== id);
+    saveData('fw_trainers', trainers);
+    showToast('Trainer removed', 'error');
+    init();
+  }
+}
+
+// CLASSES
+function openAddClassModal() {
+  document.getElementById('class-modal').classList.add('open');
+}
+
+function closeClassModal() {
+  document.getElementById('class-modal').classList.remove('open');
+}
+
+function handleClassSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('class-name').value;
+  const trainer = document.getElementById('class-trainer-select').value;
+  const schedule = document.getElementById('class-schedule').value;
+  const capacity = parseInt(document.getElementById('class-capacity').value) || 20;
+
+  const newClass = {
+    id: 'c' + Date.now(),
+    name,
+    trainer,
+    schedule,
+    capacity,
+    enrolled: 0,
+    status: 'Running'
+  };
+
+  classes.push(newClass);
+  saveData('fw_classes', classes);
+  closeClassModal();
+  showToast('Class created successfully!');
+  init();
+}
+
+function deleteClass(id) {
+  if (confirm('Are you sure you want to delete this class?')) {
+    classes = classes.filter(c => c.id !== id);
+    saveData('fw_classes', classes);
+    showToast('Class deleted', 'error');
+    init();
+  }
+}
+
+// SETTINGS
+function saveGymDetails(e) {
+  e.preventDefault();
+  settings.gym_name = document.getElementById('settings-gym-name').value;
+  settings.location = document.getElementById('settings-location').value;
+  settings.phone = document.getElementById('settings-phone').value;
+  settings.email = document.getElementById('settings-email').value;
+
+  saveData('fw_settings', settings);
+  showToast('Gym details saved successfully!');
+  init();
+}
+
+function saveNotificationSettings(e) {
+  e.preventDefault();
+  settings.email_reminders_enabled = document.getElementById('settings-email-reminders').checked;
+  settings.reminder_template_7_days = document.getElementById('settings-template-7days').value;
+  settings.reminder_template_today = document.getElementById('settings-template-today').value;
+
+  saveData('fw_settings', settings);
+  showToast('Notification settings saved successfully!');
+  init();
+}
+
+// WHATSAPP RENEWAL REMINDER TRIGGER
+function sendWhatsAppReminder(memberId, daysRemaining = 0) {
+  const m = members.find(x => x.id === memberId);
+  if (!m) return;
+
+  const template = daysRemaining === 7 ? settings.reminder_template_7_days : settings.reminder_template_today;
+  const msgTemplate = template || "Hello {name}, your {plan} membership expires on {expiry_date}. Please renew to continue.";
+  
+  const text = msgTemplate
+    .replace(/{name}/g, m.full_name)
+    .replace(/{plan}/g, m.plan_name)
+    .replace(/{expiry_date}/g, m.membership_end || 'N/A')
+    .replace(/{gym_name}/g, settings.gym_name);
+
+  let cleanPhone = m.phone ? m.phone.replace(/[^\d]/g, '') : '';
+  if (cleanPhone.length === 10) {
+    cleanPhone = '91' + cleanPhone;
+  }
+
+  const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+// Initialize on load
+window.onload = init;
+</script>
+</body>
+</html>
